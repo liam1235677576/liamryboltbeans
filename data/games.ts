@@ -1,0 +1,71 @@
+
+import { Game, GameCategory } from '../types';
+
+export const GAMES: Game[] = [
+  {
+    id: '2048',
+    title: '2048',
+    description: 'Classic tile-sliding puzzle. Combine numbers to reach 2048!',
+    category: GameCategory.PUZZLE,
+    thumbnail: 'https://images.unsplash.com/photo-1614064641938-3bbee52942c7?auto=format&fit=crop&q=80&w=400&h=300',
+    iframeUrl: 'https://play2048.co/',
+    featured: true
+  },
+  {
+    id: 'hextris',
+    title: 'Hextris',
+    description: 'Fast-paced puzzle game where you rotate a hexagon to catch colored blocks.',
+    category: GameCategory.ARCADE,
+    thumbnail: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=400&h=300',
+    iframeUrl: 'https://hextris.io/',
+    featured: true
+  },
+  {
+    id: 'snake',
+    title: 'Google Snake',
+    description: 'The legendary retro game. Eat the apples and grow as long as possible.',
+    category: GameCategory.ARCADE,
+    thumbnail: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&q=80&w=400&h=300',
+    iframeUrl: 'https://www.google.com/logos/2010/pacman10-i.html' 
+  },
+  {
+    id: 'slope',
+    title: 'Slope Game',
+    description: 'Roll down the slope as fast as you can. Avoid obstacles!',
+    category: GameCategory.ACTION,
+    thumbnail: 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&q=80&w=400&h=300',
+    iframeUrl: 'https://slopegame.io/'
+  },
+  {
+    id: 'tetris',
+    title: 'Tetris Classic',
+    description: 'Fit the blocks together and clear lines in this timeless classic.',
+    category: GameCategory.PUZZLE,
+    thumbnail: 'https://images.unsplash.com/photo-1605898835373-02f740d04da6?auto=format&fit=crop&q=80&w=400&h=300',
+    iframeUrl: 'https://tetris.com/play-tetris'
+  },
+  {
+    id: 'chess',
+    title: 'Grandmaster Chess',
+    description: 'Test your tactical skills in the ultimate game of strategy.',
+    category: GameCategory.STRATEGY,
+    thumbnail: 'https://images.unsplash.com/photo-1528819622765-d6bcf132f793?auto=format&fit=crop&q=80&w=400&h=300',
+    iframeUrl: 'https://chess.org/'
+  },
+  {
+    id: 'paper-io',
+    title: 'Paper.io 2',
+    description: 'Capture as much territory as possible. Don\'t let others cut your trail!',
+    category: GameCategory.ACTION,
+    thumbnail: 'https://images.unsplash.com/photo-1534423861386-85a16f5d13fd?auto=format&fit=crop&q=80&w=400&h=300',
+    iframeUrl: 'https://paper-io.com/'
+  },
+  {
+    id: 'cookie-clicker',
+    title: 'Cookie Clicker',
+    description: 'Click the cookie, buy upgrades, and build an empire of cookies.',
+    category: GameCategory.ARCADE,
+    thumbnail: 'https://images.unsplash.com/photo-1558961312-5034fca039ae?auto=format&fit=crop&q=80&w=400&h=300',
+    iframeUrl: 'https://orteil.dashnet.org/cookieclicker/'
+  }
+];
