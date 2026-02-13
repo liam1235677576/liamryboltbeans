@@ -1,32 +1,22 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Game, GameCategory, ViewState } from './types.ts';
-import { Navbar } from './components/Navbar.tsx';
-import { GameCard } from './components/GameCard.tsx';
-import { GamePlayer } from './components/GamePlayer.tsx';
+import { Game, GameCategory, ViewState } from './types';
+import { Navbar } from './components/Navbar';
+import { GameCard } from './components/GameCard';
+import { GamePlayer } from './components/GamePlayer';
+// Import the GAMES data directly from the provided games.ts file
+import { GAMES } from './data/games';
 
 const App: React.FC = () => {
-  const [games, setGames] = useState<Game[]>([]);
+  // Initialize games state with the imported GAMES data
+  const [games, setGames] = useState<Game[]>(GAMES);
   const [view, setView] = useState<ViewState>('home');
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<GameCategory>(GameCategory.ALL);
   const [favorites, setFavorites] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  // Fetch games from JSON file
-  useEffect(() => {
-    fetch('./data/games.json')
-      .then(res => res.json())
-      .then(data => {
-        setGames(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Failed to load games", err);
-        setLoading(false);
-      });
-  }, []);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Load favorites from local storage on mount
   useEffect(() => {
@@ -88,6 +78,26 @@ const App: React.FC = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 text-center">
+        <div className="w-16 h-16 bg-red-500/20 text-red-500 rounded-full flex items-center justify-center mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <h2 className="text-2xl font-bold text-white mb-2 font-rajdhani">Oops! Something went wrong</h2>
+        <p className="text-slate-400 max-w-md mb-6">{error}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all"
+        >
+          Retry Loading
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 selection:bg-indigo-500 selection:text-white">
       <Navbar 
@@ -115,9 +125,13 @@ const App: React.FC = () => {
                   <img src={game.thumbnail} alt={game.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
                   <div className="absolute bottom-0 left-0 p-6 w-full">
-                    <span className="inline-block px-3 py-1 bg-indigo-600 rounded-full text-[10px] font-bold uppercase tracking-tighter text-white mb-2">Featured</span>
-                    <h3 className="text-3xl font-rajdhani font-bold text-white group-hover:text-indigo-400 transition-colors">{game.title}</h3>
-                    <p className="text-slate-300 text-sm mt-1 max-w-lg line-clamp-1">{game.description}</p>
+                    {/* Completing the truncated JSX here */}
+                    <span className="inline-block px-3 py-1 bg-indigo-600 rounded-full text-xs font-bold uppercase tracking-widest text-white">
+                      {game.category}
+                    </span>
+                    <h3 className="text-2xl font-bold text-white mt-2 group-hover:text-indigo-400 transition-colors">
+                      {game.title}
+                    </h3>
                   </div>
                 </div>
               ))}
@@ -125,16 +139,16 @@ const App: React.FC = () => {
           </section>
         )}
 
-        {/* Categories Bar */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-8 no-scrollbar">
+        {/* Category Filters */}
+        <div className="flex flex-wrap gap-2 mb-8 overflow-x-auto pb-2">
           {categories.map(cat => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-5 py-2 rounded-full font-semibold whitespace-nowrap transition-all border ${
-                activeCategory === cat 
-                  ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-500/20' 
-                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-600 hover:text-white'
+              className={`px-5 py-2 rounded-xl text-sm font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
+                activeCategory === cat
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
+                  : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'
               }`}
             >
               {cat}
@@ -143,16 +157,17 @@ const App: React.FC = () => {
         </div>
 
         {/* Game Grid */}
-        <div className="mb-12">
+        <section>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-rajdhani font-bold text-white uppercase tracking-wider">
-              {view === 'favorites' ? 'My Favorite Games' : `${activeCategory} Games`}
+            <h2 className="text-2xl font-rajdhani font-bold text-white flex items-center gap-3">
+              <span className="w-1.5 h-6 bg-indigo-500 rounded-full" />
+              {view === 'favorites' ? 'My Favorites' : activeCategory === GameCategory.ALL ? 'All Games' : `${activeCategory} Games`}
             </h2>
-            <span className="text-slate-500 text-sm font-medium">{filteredGames.length} Results</span>
+            <p className="text-slate-500 text-sm font-semibold">{filteredGames.length} Games Found</p>
           </div>
 
           {filteredGames.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredGames.map(game => (
                 <GameCard 
                   key={game.id} 
@@ -164,67 +179,44 @@ const App: React.FC = () => {
               ))}
             </div>
           ) : (
-            <div className="py-20 text-center bg-slate-900/50 rounded-3xl border border-slate-800 border-dashed">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-16 h-16 mx-auto mb-4 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 9.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <h3 className="text-xl font-bold text-slate-400">No games found</h3>
-              <p className="text-slate-500 mt-2">Try adjusting your filters or search terms.</p>
-              <button 
-                onClick={() => {setSearchQuery(''); setActiveCategory(GameCategory.ALL); setView('home');}}
-                className="mt-6 px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all"
-              >
-                Show All Games
-              </button>
+            <div className="py-20 text-center">
+              <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-600">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-white">No games found</h3>
+              <p className="text-slate-500 mt-2">Try searching for something else or changing the category.</p>
             </div>
           )}
-        </div>
+        </section>
       </main>
 
       {/* Footer */}
-      <footer className="bg-slate-900/50 border-t border-slate-800 py-12 px-4">
+      <footer className="border-t border-slate-900 py-12 px-4 mt-20">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-indigo-600 rounded-md flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
-                </svg>
-              </div>
-              <span className="text-xl font-rajdhani font-bold tracking-tight text-white">NOVA<span className="text-indigo-400">ARCADE</span></span>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
+              </svg>
             </div>
-            <p className="text-slate-500 text-sm max-w-xs">The world's best hub for unblocked HTML5 games. No downloads, just pure gaming fun.</p>
+            <span className="text-xl font-rajdhani font-bold tracking-tight text-white">NOVA<span className="text-indigo-400">ARCADE</span></span>
           </div>
-          <div className="flex gap-8">
-            <div>
-              <h4 className="font-bold text-white mb-4 uppercase tracking-wider text-xs">Platform</h4>
-              <ul className="text-sm text-slate-500 space-y-2">
-                <li className="hover:text-indigo-400 cursor-pointer transition-colors">Request a Game</li>
-                <li className="hover:text-indigo-400 cursor-pointer transition-colors">Privacy Policy</li>
-                <li className="hover:text-indigo-400 cursor-pointer transition-colors">Terms of Service</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold text-white mb-4 uppercase tracking-wider text-xs">Community</h4>
-              <ul className="text-sm text-slate-500 space-y-2">
-                <li className="hover:text-indigo-400 cursor-pointer transition-colors">Discord</li>
-                <li className="hover:text-indigo-400 cursor-pointer transition-colors">Twitter</li>
-                <li className="hover:text-indigo-400 cursor-pointer transition-colors">GitHub</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div className="max-w-7xl mx-auto mt-12 pt-8 border-t border-slate-800 text-center text-slate-600 text-xs">
-          © {new Date().getFullYear()} NovaArcade. All games are properties of their respective owners.
+          <p className="text-slate-500 text-sm">© 2024 NovaArcade. All rights reserved. Play responsively.</p>
         </div>
       </footer>
 
-      {/* Fullscreen Player Portal */}
+      {/* Game Detail Modal View */}
       {selectedGame && (
-        <GamePlayer game={selectedGame} onClose={handleClosePlayer} />
+        <GamePlayer 
+          game={selectedGame} 
+          onClose={handleClosePlayer} 
+        />
       )}
     </div>
   );
 };
 
+// Fix for index.tsx error: export default App to provide the expected module shape
 export default App;
