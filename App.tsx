@@ -1,17 +1,32 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { GAMES } from './data/games';
-import { Game, GameCategory, ViewState } from './types';
-import { Navbar } from './components/Navbar';
-import { GameCard } from './components/GameCard';
-import { GamePlayer } from './components/GamePlayer';
+import { Game, GameCategory, ViewState } from './types.ts';
+import { Navbar } from './components/Navbar.tsx';
+import { GameCard } from './components/GameCard.tsx';
+import { GamePlayer } from './components/GamePlayer.tsx';
 
 const App: React.FC = () => {
+  const [games, setGames] = useState<Game[]>([]);
   const [view, setView] = useState<ViewState>('home');
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<GameCategory>(GameCategory.ALL);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch games from JSON file
+  useEffect(() => {
+    fetch('./data/games.json')
+      .then(res => res.json())
+      .then(data => {
+        setGames(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Failed to load games", err);
+        setLoading(false);
+      });
+  }, []);
 
   // Load favorites from local storage on mount
   useEffect(() => {
@@ -40,7 +55,7 @@ const App: React.FC = () => {
   };
 
   const filteredGames = useMemo(() => {
-    return GAMES.filter(game => {
+    return games.filter(game => {
       const matchesSearch = game.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           game.description.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = activeCategory === GameCategory.ALL || game.category === activeCategory;
@@ -48,9 +63,9 @@ const App: React.FC = () => {
       
       return matchesSearch && matchesCategory && matchesView;
     });
-  }, [searchQuery, activeCategory, view, favorites]);
+  }, [games, searchQuery, activeCategory, view, favorites]);
 
-  const featuredGames = useMemo(() => GAMES.filter(g => g.featured), []);
+  const featuredGames = useMemo(() => games.filter(g => g.featured), [games]);
 
   const handleGameSelect = (game: Game) => {
     setSelectedGame(game);
@@ -63,6 +78,15 @@ const App: React.FC = () => {
   };
 
   const categories = Object.values(GameCategory);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center">
+        <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-slate-400 font-rajdhani animate-pulse uppercase tracking-widest">Initialising NovaArcade...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 selection:bg-indigo-500 selection:text-white">
